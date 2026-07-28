@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17181a">
+  <title>SKS | Sarath Kumara Sons</title>
+  <meta name="description" content="Shop premium SKS fashion with islandwide delivery and cash on delivery. Select your size and order directly through WhatsApp.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="SKS | Fashion Redefined">
+  <meta property="og:description" content="Premium fashion, islandwide delivery and direct WhatsApp ordering.">
+  <meta property="og:image" content="/assets/hero.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2218%22 fill=%22%23e32126%22/><text x=%2250%22 y=%2264%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2244%22 font-weight=%22900%22 fill=%22white%22>SK</text></svg>">
+  <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="preloader-mark">SKS</div>
+  </div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/" aria-label="Sarath Kumara Sons home">
+        <span class="brand-symbol">SK</span>
+        <span>Sarath Kumara Sons</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="#collection">Collection</a>
+        <a href="#delivery">Delivery</a>
+        <a class="nav-whatsapp" data-whatsapp-link href="https://wa.me/94775043005">WhatsApp</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-label="SKS Fashion Redefined">
+      <img
+        class="hero-image"
+        src="/assets/hero.png"
+        alt="SKS Fashion Redefined collection"
+        width="1773"
+        height="887"
+        fetchpriority="high"
+      >
+      <a class="hero-scroll" href="#collection">
+        Shop the collection
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+      </a>
+    </section>
+
+    <section class="catalogue" id="collection">
+      <div class="container">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">New arrival</p>
+            <h1>Our Collection</h1>
+          </div>
+          <p class="section-heading-copy">
+            Choose your preferred size and tap Buy now. Your product, size, price and product card will be prepared automatically in WhatsApp.
+          </p>
+        </div>
+
+        <div class="catalogue-tools">
+          <label class="search-box">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="searchInput" type="search" placeholder="Search the collection" autocomplete="off">
+          </label>
+          <div class="filters" aria-label="Product filters">
+            <button class="filter-button is-active" type="button" data-filter="all" aria-pressed="true">All</button>
+            <button class="filter-button" type="button" data-filter="in-stock" aria-pressed="false">In stock</button>
+          </div>
+        </div>
+
+        <div class="product-grid" id="productGrid" aria-live="polite">
+          <div class="empty-state">Loading the collection...</div>
+        </div>
+        <div class="empty-state" id="emptyState" hidden>No products match your search.</div>
+      </div>
+    </section>
+
+    <section class="service-strip" id="delivery">
+      <div class="container service-grid">
+        <article class="service-item">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h11v11H3zM14 10h4l3 3v4h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+          <div><h3>Islandwide delivery</h3><p>Delivery to anywhere in Sri Lanka</p></div>
+        </article>
+        <article class="service-item">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h4M7 14h2"/></svg>
+          <div><h3>Cash on delivery</h3><p>Pay when your order arrives</p></div>
+        </article>
+        <article class="service-item">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.5-.1-.7.1-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.2-1.4-.8-.7-1.4-1.7-1.6-1.9-.2-.3 0-.4.1-.6l.4-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.6-.9-2.1-.2-.6-.5-.5-.6-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4 0 1.4 1 2.8 1.2 3 .1.2 2 3.1 4.9 4.4.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.6-.1 1.7-.7 1.9-1.3.2-.7.2-1.2.2-1.3-.1-.2-.3-.2-.6-.4M12 2a10 10 0 0 0-8.7 15L2 22l5.1-1.3A10 10 0 1 0 12 2"/></svg>
+          <div><h3>Direct WhatsApp order</h3><p>Product details are added automatically</p></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <a class="brand" href="/">
+          <span class="brand-symbol">SK</span>
+          <span>Sarath Kumara Sons</span>
+        </a>
+        <p class="footer-copy">Elegance. Comfort. You.</p>
+      </div>
+      <a class="footer-whatsapp" data-whatsapp-link href="https://wa.me/94775043005">WhatsApp: 077 504 3005</a>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="/src/app.js"></script>
+</body>
+</html>

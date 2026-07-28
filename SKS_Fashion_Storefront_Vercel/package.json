@@ -1,0 +1,22 @@
+{
+  "name": "sks-fashion-storefront",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Sarath Kumara Sons fashion catalogue with WhatsApp ordering and SQLite-compatible product data.",
+  "scripts": {
+    "db:seed": "node scripts/create-local-db.mjs",
+    "dev": "vercel dev",
+    "test": "node --test",
+    "check": "npm test && node scripts/check-project.mjs"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.17.4"
+  },
+  "devDependencies": {
+    "vercel": "^58.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
