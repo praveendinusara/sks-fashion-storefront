@@ -55,7 +55,7 @@
         </button>
         <button class="nav-button" type="button" data-panel="settingsPanel">
           <span>Site settings</span>
-          <small>WhatsApp and social links</small>
+          <small>Logo, hero and social links</small>
         </button>
       </nav>
       <div class="sidebar-footer">
@@ -139,6 +139,25 @@
           <section class="panel-card settings-section">
             <div class="panel-card-header">
               <div>
+                <h2>Shop logo</h2>
+                <p>Upload your logo, preview it here and publish it directly to the storefront.</p>
+              </div>
+            </div>
+            <div class="image-setting logo-setting">
+              <div class="logo-preview-surface is-empty">
+                <img id="logoPreview" alt="Current shop logo preview" hidden>
+              </div>
+              <label>
+                Replace shop logo
+                <input id="logoFile" type="file" accept="image/jpeg,image/png,image/webp,image/avif">
+                <small>PNG, JPG, WebP or AVIF. Empty space is trimmed automatically before publishing.</small>
+              </label>
+            </div>
+          </section>
+
+          <section class="panel-card settings-section">
+            <div class="panel-card-header">
+              <div>
                 <h2>Social media links</h2>
                 <p>Leave a field blank if that platform should not appear.</p>
               </div>
@@ -182,7 +201,7 @@
 
           <div class="settings-actions">
             <p class="form-error" id="settingsError" role="alert"></p>
-            <button class="primary-button" type="submit">Save site settings</button>
+            <button class="primary-button" type="submit">Save and publish site settings</button>
           </div>
         </form>
       </section>
@@ -272,4 +291,3 @@
   <script type="module" src="/admin/app.js"></script>
 </body>
 </html>
-

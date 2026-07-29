@@ -21,6 +21,8 @@ const productImagePreview = document.querySelector("#productImagePreview");
 const productImageFile = document.querySelector("#productImageFile");
 const settingsForm = document.querySelector("#settingsForm");
 const settingsError = document.querySelector("#settingsError");
+const logoFile = document.querySelector("#logoFile");
+const logoPreview = document.querySelector("#logoPreview");
 const heroFile = document.querySelector("#heroFile");
 const heroPreview = document.querySelector("#heroPreview");
 const saveStatus = document.querySelector("#saveStatus");
@@ -163,6 +165,20 @@ function renderProducts() {
   productEmpty.hidden = products.length > 0;
 }
 
+function setLogoPreview(url) {
+  const surface = logoPreview.closest(".logo-preview-surface");
+  if (!url) {
+    logoPreview.hidden = true;
+    logoPreview.removeAttribute("src");
+    surface?.classList.add("is-empty");
+    return;
+  }
+
+  logoPreview.hidden = false;
+  logoPreview.src = url;
+  surface?.classList.remove("is-empty");
+}
+
 function populateSettings() {
   [
     "whatsappNumber",
@@ -176,6 +192,7 @@ function populateSettings() {
     const input = settingsForm.elements.namedItem(name);
     if (input) input.value = state.settings[name] || "";
   });
+  setLogoPreview(state.settings.logoImage || "");
   heroPreview.src = state.settings.heroImage || "/assets/hero.png";
 }
 
@@ -218,7 +235,7 @@ function closeProductEditor() {
   if (productDialog.open) productDialog.close();
 }
 
-async function optimizeImage(file) {
+async function optimizeImage(file, { kind = "content" } = {}) {
   if (!file) return null;
   if (!file.type.startsWith("image/")) {
     throw new Error("Choose a valid image file.");
@@ -226,20 +243,95 @@ async function optimizeImage(file) {
 
   try {
     const bitmap = await createImageBitmap(file);
-    const maximumDimension = 1800;
+    const isLogo = kind === "logo";
+    const maximumDimension = isLogo ? 1600 : 1800;
     const scale = Math.min(1, maximumDimension / Math.max(bitmap.width, bitmap.height));
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-    const context = canvas.getContext("2d", { alpha: false });
-    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    const sourceCanvas = document.createElement("canvas");
+    sourceCanvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    sourceCanvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    const sourceContext = sourceCanvas.getContext("2d", { alpha: true });
+    sourceContext.clearRect(0, 0, sourceCanvas.width, sourceCanvas.height);
+    sourceContext.drawImage(bitmap, 0, 0, sourceCanvas.width, sourceCanvas.height);
     bitmap.close();
 
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", 0.86));
+    let cropX = 0;
+    let cropY = 0;
+    let cropWidth = sourceCanvas.width;
+    let cropHeight = sourceCanvas.height;
+
+    if (isLogo) {
+      const imageData = sourceContext.getImageData(
+        0,
+        0,
+        sourceCanvas.width,
+        sourceCanvas.height
+      );
+      const pixels = imageData.data;
+      const background = [pixels[0], pixels[1], pixels[2], pixels[3]];
+      const transparentBackground = background[3] < 32;
+      let minX = sourceCanvas.width;
+      let minY = sourceCanvas.height;
+      let maxX = -1;
+      let maxY = -1;
+
+      for (let y = 0; y < sourceCanvas.height; y += 1) {
+        for (let x = 0; x < sourceCanvas.width; x += 1) {
+          const index = (y * sourceCanvas.width + x) * 4;
+          const alpha = pixels[index + 3];
+          if (alpha <= 16) continue;
+
+          const colourDistance = Math.max(
+            Math.abs(pixels[index] - background[0]),
+            Math.abs(pixels[index + 1] - background[1]),
+            Math.abs(pixels[index + 2] - background[2])
+          );
+          const visible = transparentBackground
+            ? alpha > 16
+            : colourDistance > 24 || Math.abs(alpha - background[3]) > 20;
+
+          if (!visible) continue;
+          minX = Math.min(minX, x);
+          minY = Math.min(minY, y);
+          maxX = Math.max(maxX, x);
+          maxY = Math.max(maxY, y);
+        }
+      }
+
+      if (maxX >= minX && maxY >= minY) {
+        const padding = Math.max(
+          8,
+          Math.round(Math.max(maxX - minX + 1, maxY - minY + 1) * 0.035)
+        );
+        cropX = Math.max(0, minX - padding);
+        cropY = Math.max(0, minY - padding);
+        cropWidth = Math.min(sourceCanvas.width - cropX, maxX - cropX + 1 + padding);
+        cropHeight = Math.min(sourceCanvas.height - cropY, maxY - cropY + 1 + padding);
+      }
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, cropWidth);
+    canvas.height = Math.max(1, cropHeight);
+    const context = canvas.getContext("2d", { alpha: true });
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(
+      sourceCanvas,
+      cropX,
+      cropY,
+      cropWidth,
+      cropHeight,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    const quality = isLogo ? 0.94 : 0.86;
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", quality));
     if (!blob) throw new Error("Image compression failed.");
     return new File(
       [blob],
-      `${file.name.replace(/\.[^.]+$/, "") || "product"}.webp`,
+      `${file.name.replace(/\.[^.]+$/, "") || (isLogo ? "logo" : "image")}.webp`,
       { type: "image/webp" }
     );
   } catch (error) {
@@ -250,8 +342,8 @@ async function optimizeImage(file) {
   }
 }
 
-async function uploadImage(file) {
-  const optimized = await optimizeImage(file);
+async function uploadImage(file, kind = "content") {
+  const optimized = await optimizeImage(file, { kind });
   if (!optimized) return "";
   const response = await fetch(
     `/api/admin/upload?filename=${encodeURIComponent(optimized.name)}`,
@@ -353,6 +445,11 @@ async function saveSettings(event) {
   setBusy(settingsForm, true, "Saving...");
 
   try {
+    let logoImage = state.settings.logoImage || "";
+    if (logoFile.files[0]) {
+      logoImage = await uploadImage(logoFile.files[0], "logo");
+    }
+
     let heroImage = state.settings.heroImage || "/assets/hero.png";
     if (heroFile.files[0]) {
       heroImage = await uploadImage(heroFile.files[0]);
@@ -367,6 +464,7 @@ async function saveSettings(event) {
       instagram: String(formData.get("instagram") || "").trim(),
       tiktok: String(formData.get("tiktok") || "").trim(),
       youtube: String(formData.get("youtube") || "").trim(),
+      logoImage,
       heroImage
     };
     const payload = await api("/api/admin/settings", {
@@ -375,6 +473,7 @@ async function saveSettings(event) {
     });
     state.settings = payload.settings;
     populateSettings();
+    logoFile.value = "";
     heroFile.value = "";
     setUpdatedAt(payload.updatedAt);
     showToast("Site settings updated.");
@@ -458,10 +557,22 @@ productImageFile.addEventListener("change", () => {
   if (file) productImagePreview.src = URL.createObjectURL(file);
 });
 
+logoFile.addEventListener("change", async () => {
+  const file = logoFile.files[0];
+  if (!file) return;
+
+  settingsError.textContent = "";
+  try {
+    const optimized = await optimizeImage(file, { kind: "logo" });
+    setLogoPreview(URL.createObjectURL(optimized));
+  } catch (error) {
+    settingsError.textContent = error.message;
+  }
+});
+
 heroFile.addEventListener("change", () => {
   const file = heroFile.files[0];
   if (file) heroPreview.src = URL.createObjectURL(file);
 });
 
 checkSession();
-
