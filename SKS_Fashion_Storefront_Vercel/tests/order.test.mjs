@@ -16,17 +16,19 @@ test("normalizes the Sri Lankan WhatsApp number", () => {
   assert.equal(normalizeWhatsAppNumber("+94 77 504 3005"), "94775043005");
 });
 
-test("includes the selected size, price, code and product card", () => {
+test("includes only the requested product order details", () => {
   const message = buildOrderMessage({
     product,
-    size: "2XL",
-    productCardUrl: "https://example.com/api/product-share?id=italian-cotton-long-frock"
+    size: "2XL"
   });
 
   assert.match(message, /Size: 2XL/);
   assert.match(message, /Price: LKR 3,495/);
-  assert.match(message, /Code: NRT-LF-001/);
-  assert.match(message, /Product card: https:\/\/example\.com/);
+  assert.match(message, /Product Name: Italian Cotton Long Frock/);
+  assert.match(message, /Product Code: NRT-LF-001/);
+  assert.match(message, /Please confirm availability and delivery details/);
+  assert.doesNotMatch(message, /Product card/i);
+  assert.doesNotMatch(message, /https?:\/\//i);
 });
 
 test("builds a direct click-to-chat URL", () => {
