@@ -11,6 +11,7 @@ const DEFAULT_SETTINGS = {
   tiktok: "",
   youtube: "",
   deliveryDetails: "Cash on delivery available. Islandwide delivery.",
+  logoImage: "",
   heroImage: "/assets/hero.png"
 };
 
@@ -165,4 +166,3 @@ export function createProductId(code) {
 }
 
 export { DEFAULT_SETTINGS };
-
