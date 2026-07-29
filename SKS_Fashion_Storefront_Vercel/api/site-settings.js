@@ -9,12 +9,10 @@ export default async function handler(request, response) {
   try {
     const state = await getStoreState();
     response.setHeader("Cache-Control", "s-maxage=30, stale-while-revalidate=120");
-    return response.status(200).json({
-      products: state.products,
-      updatedAt: state.updatedAt
-    });
+    return response.status(200).json({ settings: state.settings });
   } catch (error) {
-    console.error("Unable to load products", error);
-    return response.status(500).json({ error: "Products are temporarily unavailable" });
+    console.error("Unable to load site settings", error);
+    return response.status(500).json({ error: "Site settings are temporarily unavailable" });
   }
 }
+
