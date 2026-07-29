@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17181a">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <title>SKS Private Admin</title>
+  <link rel="stylesheet" href="/admin/styles.css">
+</head>
+<body>
+  <main class="login-view" id="loginView">
+    <section class="login-card">
+      <a class="admin-brand" href="/" aria-label="Open SKS storefront">
+        <span class="brand-mark">SK</span>
+        <span>
+          <strong>SKS Private Admin</strong>
+          <small>Sarath Kumara Sons</small>
+        </span>
+      </a>
+      <div class="login-copy">
+        <p class="eyebrow">Owner access</p>
+        <h1>Sign in to manage your store</h1>
+        <p>Products, images and social links are protected behind this private login.</p>
+      </div>
+      <form id="loginForm">
+        <label>
+          Username
+          <input name="username" autocomplete="username" required>
+        </label>
+        <label>
+          Password
+          <input name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <p class="form-error" id="loginError" role="alert"></p>
+        <button class="primary-button" type="submit">Sign in securely</button>
+      </form>
+      <a class="store-link" href="/">Return to storefront</a>
+    </section>
+  </main>
+
+  <div class="dashboard" id="dashboard" hidden>
+    <aside class="sidebar">
+      <a class="admin-brand sidebar-brand" href="/">
+        <span class="brand-mark">SK</span>
+        <span>
+          <strong>SKS Admin</strong>
+          <small>Private workspace</small>
+        </span>
+      </a>
+      <nav aria-label="Admin navigation">
+        <button class="nav-button is-active" type="button" data-panel="productsPanel">
+          <span>Products</span>
+          <small>Add, edit or remove</small>
+        </button>
+        <button class="nav-button" type="button" data-panel="settingsPanel">
+          <span>Site settings</span>
+          <small>WhatsApp and social links</small>
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="/" target="_blank" rel="noopener">Open live store</a>
+        <button id="logoutButton" type="button">Sign out</button>
+      </div>
+    </aside>
+
+    <main class="dashboard-main">
+      <header class="dashboard-header">
+        <div>
+          <p class="eyebrow">Secure dashboard</p>
+          <h1 id="panelTitle">Products</h1>
+        </div>
+        <div class="header-actions">
+          <span class="save-status" id="saveStatus" aria-live="polite"></span>
+          <button class="primary-button compact" id="addProductButton" type="button">Add product</button>
+        </div>
+      </header>
+
+      <section class="admin-panel" id="productsPanel">
+        <div class="summary-grid">
+          <article>
+            <span>Total products</span>
+            <strong id="totalProducts">0</strong>
+          </article>
+          <article>
+            <span>In stock</span>
+            <strong id="inStockProducts">0</strong>
+          </article>
+          <article>
+            <span>Sold out</span>
+            <strong id="soldOutProducts">0</strong>
+          </article>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-card-header">
+            <div>
+              <h2>Product catalogue</h2>
+              <p>Changes appear on the storefront immediately after saving.</p>
+            </div>
+            <label class="search-control">
+              <span class="sr-only">Search products</span>
+              <input id="adminSearch" type="search" placeholder="Search name or code">
+            </label>
+          </div>
+          <div class="product-list" id="productList"></div>
+          <div class="empty-admin-state" id="productEmpty" hidden>
+            No products match your search.
+          </div>
+        </div>
+      </section>
+
+      <section class="admin-panel" id="settingsPanel" hidden>
+        <form class="settings-form" id="settingsForm">
+          <section class="panel-card settings-section">
+            <div class="panel-card-header">
+              <div>
+                <h2>WhatsApp ordering</h2>
+                <p>This number receives every customer order.</p>
+              </div>
+            </div>
+            <div class="form-grid">
+              <label>
+                WhatsApp number
+                <input name="whatsappNumber" inputmode="tel" placeholder="94775043005" required>
+                <small>Use the country code without the plus sign.</small>
+              </label>
+              <label>
+                Display number
+                <input name="whatsappDisplay" placeholder="077 504 3005" required>
+              </label>
+              <label class="wide">
+                Delivery message
+                <input name="deliveryDetails" placeholder="Cash on delivery available. Islandwide delivery.">
+              </label>
+            </div>
+          </section>
+
+          <section class="panel-card settings-section">
+            <div class="panel-card-header">
+              <div>
+                <h2>Social media links</h2>
+                <p>Leave a field blank if that platform should not appear.</p>
+              </div>
+            </div>
+            <div class="form-grid">
+              <label>
+                Facebook URL
+                <input name="facebook" type="url" placeholder="https://facebook.com/...">
+              </label>
+              <label>
+                Instagram URL
+                <input name="instagram" type="url" placeholder="https://instagram.com/...">
+              </label>
+              <label>
+                TikTok URL
+                <input name="tiktok" type="url" placeholder="https://tiktok.com/@...">
+              </label>
+              <label>
+                YouTube URL
+                <input name="youtube" type="url" placeholder="https://youtube.com/@...">
+              </label>
+            </div>
+          </section>
+
+          <section class="panel-card settings-section">
+            <div class="panel-card-header">
+              <div>
+                <h2>Hero image</h2>
+                <p>Upload a landscape image. The site adapts it automatically on mobile.</p>
+              </div>
+            </div>
+            <div class="image-setting">
+              <img id="heroPreview" src="/assets/hero.png" alt="Current hero preview">
+              <label>
+                Replace hero image
+                <input id="heroFile" type="file" accept="image/jpeg,image/png,image/webp,image/avif">
+                <small>Images are optimized before upload.</small>
+              </label>
+            </div>
+          </section>
+
+          <div class="settings-actions">
+            <p class="form-error" id="settingsError" role="alert"></p>
+            <button class="primary-button" type="submit">Save site settings</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <dialog class="product-dialog" id="productDialog">
+    <form method="dialog" class="dialog-shell" id="productForm">
+      <header>
+        <div>
+          <p class="eyebrow">Catalogue editor</p>
+          <h2 id="productDialogTitle">Add product</h2>
+        </div>
+        <button class="icon-button" id="closeProductDialog" type="button" aria-label="Close">×</button>
+      </header>
+
+      <div class="dialog-body">
+        <div class="form-grid">
+          <label>
+            Product name
+            <input name="name" required>
+          </label>
+          <label>
+            Product code
+            <input name="code" required>
+          </label>
+          <label>
+            Price in LKR
+            <input name="priceLkr" type="number" min="1" step="1" required>
+          </label>
+          <label>
+            Material
+            <input name="material" placeholder="Italian cotton">
+          </label>
+          <label class="wide">
+            Sizes
+            <input name="sizes" placeholder="S, M, L, XL" required>
+            <small>Separate each size with a comma.</small>
+          </label>
+          <label class="wide">
+            Description
+            <textarea name="description" rows="4"></textarea>
+          </label>
+          <label>
+            Image position
+            <select name="imagePosition">
+              <option value="center">Center</option>
+              <option value="top">Top</option>
+              <option value="bottom">Bottom</option>
+              <option value="left center">Left</option>
+              <option value="right center">Right</option>
+            </select>
+          </label>
+          <label>
+            Display order
+            <input name="sortOrder" type="number" min="0" step="1" value="0">
+          </label>
+          <label class="stock-switch">
+            <input name="inStock" type="checkbox" checked>
+            <span>Product is in stock</span>
+          </label>
+        </div>
+
+        <section class="product-image-editor">
+          <img id="productImagePreview" src="/assets/hero.png" alt="Product preview">
+          <div>
+            <label>
+              Product image
+              <input id="productImageFile" type="file" accept="image/jpeg,image/png,image/webp,image/avif">
+            </label>
+            <p>Upload a clear photo. It will be compressed for fast loading.</p>
+          </div>
+        </section>
+      </div>
+
+      <footer>
+        <p class="form-error" id="productError" role="alert"></p>
+        <div>
+          <button class="secondary-button" id="cancelProductButton" type="button">Cancel</button>
+          <button class="primary-button" type="submit">Save product</button>
+        </div>
+      </footer>
+    </form>
+  </dialog>
+
+  <div class="toast" id="adminToast" role="status" aria-live="polite"></div>
+  <script type="module" src="/admin/app.js"></script>
+</body>
+</html>
+
