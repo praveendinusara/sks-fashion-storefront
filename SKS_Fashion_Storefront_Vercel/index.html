@@ -16,14 +16,20 @@
 </head>
 <body>
   <div class="preloader" id="preloader" aria-hidden="true">
-    <div class="preloader-mark">SKS</div>
+    <div class="preloader-brand">
+      <img class="preloader-logo" data-brand-logo alt="Sarath Kumara Sons logo" hidden>
+      <div class="preloader-mark" data-brand-fallback>SKS</div>
+    </div>
   </div>
 
   <header class="site-header">
     <div class="container header-inner">
       <a class="brand" href="/" aria-label="Sarath Kumara Sons home">
-        <span class="brand-symbol">SK</span>
-        <span>Sarath Kumara Sons</span>
+        <img class="brand-logo" data-brand-logo alt="Sarath Kumara Sons logo" hidden>
+        <span class="brand-fallback" data-brand-fallback>
+          <span class="brand-symbol">SK</span>
+          <span>Sarath Kumara Sons</span>
+        </span>
       </a>
       <nav class="site-nav" aria-label="Primary navigation">
         <a href="#collection">Collection</a>
@@ -100,9 +106,12 @@
   <footer class="site-footer">
     <div class="container footer-inner">
       <div>
-        <a class="brand" href="/">
-          <span class="brand-symbol">SK</span>
-          <span>Sarath Kumara Sons</span>
+        <a class="brand" href="/" aria-label="Sarath Kumara Sons home">
+          <img class="brand-logo" data-brand-logo alt="Sarath Kumara Sons logo" hidden>
+          <span class="brand-fallback" data-brand-fallback>
+            <span class="brand-symbol">SK</span>
+            <span>Sarath Kumara Sons</span>
+          </span>
         </a>
         <p class="footer-copy">Elegance. Comfort. You.</p>
       </div>
