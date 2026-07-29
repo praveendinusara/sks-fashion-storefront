@@ -4,10 +4,20 @@ import {
   formatLkr
 } from "./order.js";
 
-const WHATSAPP_NUMBER = "94775043005";
+const DEFAULT_SETTINGS = {
+  whatsappNumber: "94775043005",
+  whatsappDisplay: "077 504 3005",
+  deliveryDetails: "Cash on delivery available. Islandwide delivery.",
+  heroImage: "/assets/hero.png",
+  facebook: "",
+  instagram: "",
+  tiktok: "",
+  youtube: ""
+};
 const selectedSizes = new Map();
 let allProducts = [];
 let activeFilter = "all";
+let siteSettings = { ...DEFAULT_SETTINGS };
 
 const productGrid = document.querySelector("#productGrid");
 const emptyState = document.querySelector("#emptyState");
@@ -75,7 +85,7 @@ function productCard(product) {
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.5-.1-.7.1-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.2-1.4-.8-.7-1.4-1.7-1.6-1.9-.2-.3 0-.4.1-.6l.4-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.6-.9-2.1-.2-.6-.5-.5-.6-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4 0 1.4 1 2.8 1.2 3 .1.2 2 3.1 4.9 4.4.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.6-.1 1.7-.7 1.9-1.3.2-.7.2-1.2.2-1.3-.1-.2-.3-.2-.6-.4M12 2a10 10 0 0 0-8.7 15L2 22l5.1-1.3A10 10 0 1 0 12 2"/></svg>
           ${product.inStock ? "Buy now on WhatsApp" : "Sold out"}
         </button>
-        <p class="delivery-note">Cash on delivery available. Islandwide delivery.</p>
+        <p class="delivery-note">${escapeHtml(siteSettings.deliveryDetails)}</p>
       </div>
     </article>
   `;
@@ -128,38 +138,83 @@ function orderProduct(productId) {
     return;
   }
 
-  const productCardUrl = new URL("/api/product-share", window.location.origin);
-  productCardUrl.searchParams.set("id", product.id);
   const message = buildOrderMessage({
     product,
-    size,
-    productCardUrl: productCardUrl.toString()
+    size
   });
   const whatsappUrl = buildWhatsAppUrl({
-    phoneNumber: WHATSAPP_NUMBER,
+    phoneNumber: siteSettings.whatsappNumber,
     message
   });
 
   window.location.href = whatsappUrl;
 }
 
-async function loadProducts() {
+function socialLink(label, url) {
+  if (!url) return "";
+  return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+}
+
+function applySiteSettings() {
+  const whatsappUrl = `https://wa.me/${siteSettings.whatsappNumber}`;
+
+  document.querySelectorAll("[data-whatsapp-link]").forEach((link) => {
+    link.href = whatsappUrl;
+  });
+
+  const footerWhatsApp = document.querySelector(".footer-whatsapp");
+  if (footerWhatsApp) {
+    footerWhatsApp.textContent = `WhatsApp: ${siteSettings.whatsappDisplay}`;
+  }
+
+  const heroImage = document.querySelector(".hero-image");
+  if (heroImage && siteSettings.heroImage) {
+    heroImage.src = siteSettings.heroImage;
+  }
+
+  const links = [
+    socialLink("Facebook", siteSettings.facebook),
+    socialLink("Instagram", siteSettings.instagram),
+    socialLink("TikTok", siteSettings.tiktok),
+    socialLink("YouTube", siteSettings.youtube)
+  ].filter(Boolean);
+  const socialPanel = document.querySelector("#socialPanel");
+  const socialLinks = document.querySelector("#socialLinks");
+  if (socialPanel && socialLinks) {
+    socialLinks.innerHTML = links.join("");
+    socialPanel.hidden = links.length === 0;
+  }
+}
+
+async function loadStorefront() {
   productGrid.setAttribute("aria-busy", "true");
 
   try {
-    const response = await fetch("/api/products", {
-      headers: { Accept: "application/json" }
-    });
-    if (!response.ok) throw new Error(`Product API returned ${response.status}`);
-    const payload = await response.json();
-    allProducts = Array.isArray(payload.products) ? payload.products : [];
+    const [productResponse, settingsResponse] = await Promise.all([
+      fetch("/api/products", { headers: { Accept: "application/json" } }),
+      fetch("/api/site-settings", { headers: { Accept: "application/json" } })
+    ]);
+    if (!productResponse.ok) {
+      throw new Error(`Product API returned ${productResponse.status}`);
+    }
+
+    const productPayload = await productResponse.json();
+    allProducts = Array.isArray(productPayload.products) ? productPayload.products : [];
+
+    if (settingsResponse.ok) {
+      const settingsPayload = await settingsResponse.json();
+      siteSettings = {
+        ...DEFAULT_SETTINGS,
+        ...(settingsPayload.settings || {})
+      };
+    }
   } catch (error) {
     console.error(error);
     productGrid.innerHTML = `
       <div class="load-error">
         <h3>We could not load the collection.</h3>
         <p>Please refresh the page or contact us directly on WhatsApp.</p>
-        <a href="https://wa.me/${WHATSAPP_NUMBER}">Open WhatsApp</a>
+        <a href="https://wa.me/${DEFAULT_SETTINGS.whatsappNumber}">Open WhatsApp</a>
       </div>
     `;
     return;
@@ -167,6 +222,7 @@ async function loadProducts() {
     productGrid.removeAttribute("aria-busy");
   }
 
+  applySiteSettings();
   renderProducts();
   focusLinkedProduct();
 }
@@ -210,14 +266,10 @@ filterButtons.forEach((button) => {
   });
 });
 
-document.querySelectorAll("[data-whatsapp-link]").forEach((link) => {
-  link.href = `https://wa.me/${WHATSAPP_NUMBER}`;
-});
-
 window.addEventListener("load", () => {
   window.setTimeout(() => {
     document.querySelector("#preloader")?.classList.add("is-hidden");
   }, 450);
 });
 
-loadProducts();
+loadStorefront();

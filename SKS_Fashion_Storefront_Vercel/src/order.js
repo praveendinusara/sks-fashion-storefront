@@ -8,15 +8,14 @@ export function formatLkr(value) {
   }).format(Number(value) || 0)}`;
 }
 
-export function buildOrderMessage({ product, size, productCardUrl }) {
+export function buildOrderMessage({ product, size }) {
   const lines = [
     "Hello SKS, I would like to order this item.",
     "",
-    `Product: ${product.name}`,
-    `Code: ${product.code}`,
+    `Product Name: ${product.name}`,
+    `Product Code: ${product.code}`,
     `Size: ${size}`,
     `Price: ${formatLkr(product.priceLkr)}`,
-    `Product card: ${productCardUrl}`,
     "",
     "Please confirm availability and delivery details."
   ];
