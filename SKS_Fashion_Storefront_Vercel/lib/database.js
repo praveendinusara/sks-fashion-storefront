@@ -1,14 +1,17 @@
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { createClient } from "@libsql/client";
 
 let client;
+
+const moduleDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 export function getDatabase() {
   if (client) return client;
 
   const remoteUrl = process.env.TURSO_DATABASE_URL?.trim();
   const authToken = process.env.TURSO_AUTH_TOKEN?.trim();
-  const localPath = path.join(process.cwd(), "data", "store.db");
+  const localPath = path.join(moduleDirectory, "..", "data", "store.db");
 
   client = createClient(
     remoteUrl
