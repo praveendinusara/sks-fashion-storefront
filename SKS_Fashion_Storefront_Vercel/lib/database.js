@@ -41,7 +41,8 @@ export function productFromRow(row) {
     sizes,
     image: String(row.image_path),
     imagePosition: String(row.image_position || "center"),
-    inStock: Boolean(row.in_stock)
+    inStock: Boolean(row.in_stock),
+    sortOrder: Number(row.sort_order || 0)
   };
 }
 
@@ -50,7 +51,7 @@ export async function listProducts() {
   const result = await db.execute(`
     SELECT
       id, name, code, price_lkr, material, description, sizes_json,
-      image_path, image_position, in_stock
+      image_path, image_position, in_stock, sort_order
     FROM products
     ORDER BY in_stock DESC, sort_order ASC, name ASC
   `);
@@ -64,7 +65,7 @@ export async function findProduct(id) {
     sql: `
       SELECT
         id, name, code, price_lkr, material, description, sizes_json,
-        image_path, image_position, in_stock
+        image_path, image_position, in_stock, sort_order
       FROM products
       WHERE id = ?
       LIMIT 1
