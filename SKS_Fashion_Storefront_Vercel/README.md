@@ -1,6 +1,6 @@
 # SKS Fashion Storefront
 
-Production-ready Sarath Kumara Sons catalogue for Vercel. Products are loaded from SQLite, customers select a size, and the Buy now button opens WhatsApp number `94775043005` with the product name, code, selected size, price and a hosted product-card URL.
+Production-ready Sarath Kumara Sons catalogue for Vercel. Customers select a size and the Buy now button opens WhatsApp number `94775043005` with the product name, code, selected size and price.
 
 ## Project structure
 
@@ -8,10 +8,12 @@ Production-ready Sarath Kumara Sons catalogue for Vercel. Products are loaded fr
 - `assets/hero.png`: uploaded hero artwork
 - `src/`: responsive design and WhatsApp ordering logic
 - `api/products.js`: product catalogue API
-- `api/product-share.js`: Open Graph product card used inside the WhatsApp order
+- `api/admin/`: protected product, settings and image management APIs
+- `admin/`: private owner dashboard
 - `data/store.db`: bundled SQLite catalogue
 - `data/schema.sql` and `data/seed.sql`: database source
 - `lib/database.js`: local SQLite and Turso adapter
+- `lib/catalog.js`: persistent catalogue state backed by Vercel Blob
 
 ## Local setup
 
@@ -24,20 +26,13 @@ npm run dev
 
 ## Database
 
-The project works immediately with the bundled `data/store.db` SQLite file. That file is read-only after deployment and is ideal for a catalogue updated through GitHub.
+The project works immediately with the bundled `data/store.db` SQLite file. Once `BLOB_READ_WRITE_TOKEN` is available, admin changes are stored permanently in Vercel Blob.
 
-For persistent online edits, create a Turso database, run `data/schema.sql` and `data/seed.sql`, then add these Vercel environment variables:
-
-```text
-TURSO_DATABASE_URL
-TURSO_AUTH_TOKEN
-```
-
-The API automatically switches to Turso, which is compatible with SQLite, when those variables are present.
+The admin login also requires `ADMIN_USERNAME`, `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET`. These values belong in Vercel environment variables and must never be committed to GitHub.
 
 ## WhatsApp behaviour
 
-The order button uses the official click-to-chat format. A browser link cannot attach a photo file directly to WhatsApp. Instead, the message contains the hosted product-card URL. The `/api/product-share` endpoint supplies the product image and Open Graph details so WhatsApp can generate a rich preview after the message is sent.
+The order button uses the official click-to-chat format. The WhatsApp message contains only product name, product code, selected size, price and the request to confirm availability and delivery details. It does not include a product-card URL.
 
 ## Deployment
 
