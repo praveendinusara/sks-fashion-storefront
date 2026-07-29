@@ -108,6 +108,21 @@ img {
   to { transform: scaleX(1); }
 }
 
+.preloader-brand {
+  display: grid;
+  place-items: center;
+}
+
+.preloader-logo {
+  width: min(290px, 74vw);
+  max-height: 118px;
+  padding: 8px;
+  border-radius: 12px;
+  object-fit: contain;
+  background: white;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+}
+
 .site-header {
   left: 0;
   padding: 18px 0;
@@ -126,11 +141,36 @@ img {
 .brand {
   align-items: center;
   display: inline-flex;
+  min-height: 44px;
+}
+
+.brand-fallback {
+  align-items: center;
+  display: inline-flex;
   font-size: 15px;
   font-weight: 900;
   gap: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.brand-logo {
+  display: block;
+  width: auto;
+  height: 48px;
+  max-width: min(220px, 48vw);
+  object-fit: contain;
+  object-position: left center;
+}
+
+.site-header .brand-logo {
+  border-radius: 7px;
+}
+
+.site-footer .brand-logo {
+  padding: 4px;
+  border-radius: 7px;
+  background: white;
 }
 
 .brand-symbol {
@@ -717,9 +757,14 @@ img {
     padding: 12px 0;
   }
 
-  .brand {
+  .brand-fallback {
     font-size: 11px;
     gap: 8px;
+  }
+
+  .brand-logo {
+    height: 38px;
+    max-width: 150px;
   }
 
   .brand-symbol {

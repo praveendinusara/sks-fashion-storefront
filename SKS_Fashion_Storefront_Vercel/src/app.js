@@ -8,6 +8,7 @@ const DEFAULT_SETTINGS = {
   whatsappNumber: "94775043005",
   whatsappDisplay: "077 504 3005",
   deliveryDetails: "Cash on delivery available. Islandwide delivery.",
+  logoImage: "",
   heroImage: "/assets/hero.png",
   facebook: "",
   instagram: "",
@@ -155,8 +156,39 @@ function socialLink(label, url) {
   return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${label}</a>`;
 }
 
+function applyBrandLogo(url) {
+  document.querySelectorAll("[data-brand-logo]").forEach((image) => {
+    const fallback = image.parentElement?.querySelector("[data-brand-fallback]");
+    const showFallback = () => {
+      image.hidden = true;
+      if (fallback) fallback.hidden = false;
+    };
+    const showLogo = () => {
+      image.hidden = false;
+      if (fallback) fallback.hidden = true;
+    };
+
+    if (!url) {
+      image.removeAttribute("src");
+      showFallback();
+      return;
+    }
+
+    image.onload = showLogo;
+    image.onerror = showFallback;
+    image.hidden = true;
+    if (fallback) fallback.hidden = false;
+    image.src = url;
+
+    if (image.complete && image.naturalWidth > 0) {
+      showLogo();
+    }
+  });
+}
+
 function applySiteSettings() {
   const whatsappUrl = `https://wa.me/${siteSettings.whatsappNumber}`;
+  applyBrandLogo(siteSettings.logoImage);
 
   document.querySelectorAll("[data-whatsapp-link]").forEach((link) => {
     link.href = whatsappUrl;
