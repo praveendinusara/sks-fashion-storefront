@@ -1,7 +1,7 @@
 import { requireAdmin, requireCsrf, requireRole, requireSameOrigin } from "../../lib/auth.js";
 import { addAuditEvent, getStoreState, saveStoreState } from "../../lib/catalog.js";
 import { sendSheetsEvent, sheetsConfigured } from "../../lib/google-sheets.js";
-import { buildSalesSummary, createSaleEntry } from "../../lib/sales.js";
+import { buildSalesSummary, createSaleEntry, salesMetrics } from "../../lib/sales.js";
 
 function requestBody(request) {
   if (request.body && typeof request.body === "object") return request.body;
@@ -48,9 +48,13 @@ export default async function handler(request, response) {
       const saved = await saveStoreState(state);
       return response.status(200).json({ removed, summary: buildSalesSummary(saved) });
     }
+    const query = request.query || {};
+    const term = String(query.search || "").toLowerCase();
+    const filteredLog = state.salesLog.filter((entry) => (!query.from || entry.saleDate >= query.from) && (!query.to || entry.saleDate <= query.to) && (!term || `${entry.productCode} ${entry.productName} ${entry.enteredBy}`.toLowerCase().includes(term));
     return response.status(200).json({
       summary: buildSalesSummary(state),
-      salesLog: state.salesLog.slice().reverse().slice(0, 200),
+      metrics: salesMetrics(filteredLog),
+      salesLog: filteredLog.slice().reverse().slice(0, 1000),
       sync: state.sync,
       sheetsConfigured: sheetsConfigured(),
       googleSheetUrl: state.settings.googleSheetUrl || ""
