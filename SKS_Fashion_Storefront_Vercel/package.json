@@ -9,6 +9,8 @@
     "dev": "vercel dev",
     "test": "node --test",
     "check": "npm test && node scripts/check-project.mjs"
+    ,"auth:hash": "node scripts/hash-password.mjs"
+    ,"backup": "node scripts/backup-local.mjs"
   },
   "dependencies": {
     "@libsql/client": "^0.17.4",

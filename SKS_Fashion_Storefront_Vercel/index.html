@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="/src/styles.css">
 </head>
 <body>
-  <div class="preloader" id="preloader" aria-hidden="true">
+  <div class="preloader" id="preloader" aria-hidden="true" hidden>
     <div class="preloader-brand">
       <img class="preloader-logo" data-brand-logo alt="Sarath Kumara Sons logo" hidden>
       <div class="preloader-mark" data-brand-fallback>SKS</div>
@@ -125,7 +125,7 @@
     </div>
   </footer>
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
   <script type="module" src="/src/app.js"></script>
 </body>
 </html>
