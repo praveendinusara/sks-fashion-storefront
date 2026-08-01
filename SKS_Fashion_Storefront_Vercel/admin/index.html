@@ -57,6 +57,10 @@
           <span>Site settings</span>
           <small>Logo, hero and social links</small>
         </button>
+        <button class="nav-button" type="button" data-panel="salesPanel">
+          <span>Sales monitoring</span>
+          <small>Clicks, confirmed sales and Sheets</small>
+        </button>
       </nav>
       <div class="sidebar-footer">
         <a href="/" target="_blank" rel="noopener">Open live store</a>
@@ -137,6 +141,20 @@
           </section>
 
           <section class="panel-card settings-section">
+            <div class="panel-card-header"><div><h2>Loading animation and product codes</h2><p>Control the SKS loader and automatic product-code prefix.</p></div></div>
+            <div class="form-grid">
+              <label class="stock-switch">
+                <input name="loadingAnimationEnabled" type="checkbox">
+                <span>Enable SKS loading animation</span>
+              </label>
+              <label>Product-code prefix
+                <input name="productCodePrefix" maxlength="8" placeholder="SKS">
+                <small>New products will use this prefix. Existing codes never change.</small>
+              </label>
+            </div>
+          </section>
+
+          <section class="panel-card settings-section">
             <div class="panel-card-header">
               <div>
                 <h2>Shop logo</h2>
@@ -152,7 +170,33 @@
                 <input id="logoFile" type="file" accept="image/jpeg,image/png,image/webp,image/avif">
                 <small>PNG, JPG, WebP or AVIF. Empty space is trimmed automatically before publishing.</small>
               </label>
+              <div class="form-grid logo-controls">
+                <label>Logo width
+                  <input name="logoWidth" type="range" min="60" max="320" step="1">
+                </label>
+                <label>Logo alignment
+                  <select name="logoAlignment"><option value="left">Left</option><option value="center">Centre</option><option value="right">Right</option></select>
+                </label>
+                <button class="secondary-button danger" id="removeLogoButton" type="button">Remove logo</button>
+              </div>
             </div>
+          </section>
+
+          <section class="panel-card settings-section">
+            <div class="panel-card-header"><div><h2>Website colours</h2><p>Preview practical brand colours before publishing. Low-contrast choices show a warning.</p></div></div>
+            <div class="theme-grid" id="themeControls">
+              <label>Primary <input name="theme.primary" type="color"></label>
+              <label>Background <input name="theme.background" type="color"></label>
+              <label>Accent <input name="theme.accent" type="color"></label>
+              <label>Button <input name="theme.button" type="color"></label>
+              <label>Button text <input name="theme.buttonText" type="color"></label>
+              <label>Text <input name="theme.text" type="color"></label>
+              <label>Header <input name="theme.header" type="color"></label>
+              <label>Footer <input name="theme.footer" type="color"></label>
+              <label>Link <input name="theme.link" type="color"></label>
+            </div>
+            <p class="contrast-warning" id="contrastWarning"></p>
+            <button class="secondary-button" id="resetThemeButton" type="button">Reset colours</button>
           </section>
 
           <section class="panel-card settings-section">
@@ -183,6 +227,11 @@
           </section>
 
           <section class="panel-card settings-section">
+            <div class="panel-card-header"><div><h2>Google Sheets</h2><p>Paste the share link after completing the secure Apps Script setup.</p></div></div>
+            <div class="form-grid"><label class="wide">Google Sheet URL<input name="googleSheetUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/..."></label></div>
+          </section>
+
+          <section class="panel-card settings-section">
             <div class="panel-card-header">
               <div>
                 <h2>Hero image</h2>
@@ -205,6 +254,25 @@
           </div>
         </form>
       </section>
+
+      <section class="admin-panel" id="salesPanel" hidden>
+        <div class="summary-grid">
+          <article><span>Total Buy Now clicks</span><strong id="totalClicks">0</strong></article>
+          <article><span>Confirmed quantity sold</span><strong id="totalSold">0</strong></article>
+          <article><span>Last Sheets sync</span><strong class="small-stat" id="lastSync">Not connected</strong></article>
+        </div>
+        <div class="panel-card sales-card">
+          <div class="panel-card-header"><div><h2>Record a confirmed sale</h2><p>Buy Now clicks and completed sales remain separate.</p></div><div class="row-actions"><a class="secondary-button" id="openSheetButton" target="_blank" rel="noopener" hidden>Open Sales Sheet</a><button class="secondary-button" id="syncNowButton" type="button">Sync now</button></div></div>
+          <form class="sales-form" id="salesForm">
+            <label>Product<select name="productCode" required></select></label>
+            <label>Quantity<input name="quantity" type="number" min="1" max="10000" value="1" required></label>
+            <label>Date<input name="date" type="date" required></label>
+            <label>Notes<input name="notes" maxlength="500"></label>
+            <button class="primary-button" type="submit">Add confirmed sale</button>
+          </form>
+          <div class="sales-table-wrap"><table class="sales-table"><thead><tr><th>Code</th><th>Product</th><th>Clicks</th><th>Confirmed sold</th></tr></thead><tbody id="salesTableBody"></tbody></table></div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -226,7 +294,8 @@
           </label>
           <label>
             Product code
-            <input name="code" required>
+            <input name="code" placeholder="Generated after saving" readonly>
+            <small>Automatically generated and cannot be changed.</small>
           </label>
           <label>
             Price in LKR
@@ -236,11 +305,12 @@
             Material
             <input name="material" placeholder="Italian cotton">
           </label>
-          <label class="wide">
-            Sizes
-            <input name="sizes" placeholder="S, M, L, XL" required>
-            <small>Separate each size with a comma.</small>
-          </label>
+          <div class="wide size-editor-field">
+            <span class="field-label">Sizes</span>
+            <div class="size-add-row"><input id="newSizeInput" placeholder="S, XL, Free Size or custom"><button class="secondary-button" id="addSizeButton" type="button">Add Size</button></div>
+            <div class="admin-size-list" id="adminSizeList"></div>
+            <small>Add, remove, reorder or mark each size unavailable separately.</small>
+          </div>
           <label class="wide">
             Description
             <textarea name="description" rows="4"></textarea>
@@ -259,6 +329,9 @@
             Display order
             <input name="sortOrder" type="number" min="0" step="1" value="0">
           </label>
+          <label>Status
+            <select name="status"><option value="published">Published</option><option value="draft">Draft</option><option value="archived">Archived</option></select>
+          </label>
           <label class="stock-switch">
             <input name="inStock" type="checkbox" checked>
             <span>Product is in stock</span>
@@ -266,13 +339,22 @@
         </div>
 
         <section class="product-image-editor">
-          <img id="productImagePreview" src="/assets/hero.png" alt="Product preview">
+          <div class="editor-preview-frame"><img id="productImagePreview" src="/assets/hero.png" alt="Product preview"></div>
           <div>
             <label>
               Product image
               <input id="productImageFile" type="file" accept="image/jpeg,image/png,image/webp,image/avif">
             </label>
             <p>Upload a clear photo. It will be compressed for fast loading.</p>
+            <div class="media-controls">
+              <label>Aspect ratio<select name="aspectRatio"><option value="4:5">4:5</option><option value="3:4">3:4</option><option value="1:1">1:1</option><option value="original">Original</option></select></label>
+              <label>Fit<select name="imageFit"><option value="cover">Fill container</option><option value="contain">Fit entire image</option></select></label>
+              <label>Zoom<input name="zoom" type="range" min="0.5" max="2.5" step="0.05" value="1"></label>
+              <label>Move left/right<input name="offsetX" type="range" min="-100" max="100" value="0"></label>
+              <label>Move up/down<input name="offsetY" type="range" min="-100" max="100" value="0"></label>
+              <label>Rotate<input name="rotation" type="range" min="-180" max="180" value="0"></label>
+              <button class="secondary-button" id="resetImageButton" type="button">Reset Image</button>
+            </div>
           </div>
         </section>
       </div>
@@ -280,12 +362,15 @@
       <footer>
         <p class="form-error" id="productError" role="alert"></p>
         <div>
+          <button class="secondary-button" id="previewProductButton" type="button">Preview Product</button>
           <button class="secondary-button" id="cancelProductButton" type="button">Cancel</button>
           <button class="primary-button" type="submit">Save product</button>
         </div>
       </footer>
     </form>
   </dialog>
+
+  <dialog class="product-dialog preview-dialog" id="previewDialog"><div class="dialog-shell"><header><h2>Product preview</h2><button class="icon-button" id="closePreviewButton" type="button">×</button></header><div class="dialog-body"><div class="preview-tabs"><button class="secondary-button" data-preview-width="390" type="button">Mobile</button><button class="secondary-button" data-preview-width="900" type="button">Desktop</button></div><div id="adminProductPreview" class="admin-product-preview"></div></div></div></dialog>
 
   <div class="toast" id="adminToast" role="status" aria-live="polite"></div>
   <script type="module" src="/admin/app.js"></script>
