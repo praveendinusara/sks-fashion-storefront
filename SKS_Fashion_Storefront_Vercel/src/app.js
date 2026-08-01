@@ -13,11 +13,10 @@ const DEFAULT_SETTINGS = {
   facebook: "",
   instagram: "",
   tiktok: "",
-  youtube: ""
-  ,loadingAnimationEnabled: true
-  ,logoWidth: 180
-  ,logoAlignment: "left"
-  ,theme: {}
+  youtube: "",
+  logoWidth: 180,
+  logoAlignment: "left",
+  theme: {}
 };
 const selectedSizes = new Map();
 let allProducts = [];
@@ -181,26 +180,26 @@ function socialLink(label, url) {
 
 function applyBrandLogo(url) {
   document.querySelectorAll("[data-brand-logo]").forEach((image) => {
-    const fallback = image.parentElement?.querySelector("[data-brand-fallback]");
-    const showFallback = () => {
+    const brand = image.closest(".brand");
+    const hideLogo = () => {
       image.hidden = true;
-      if (fallback) fallback.hidden = false;
+      image.removeAttribute("src");
+      if (brand) brand.hidden = true;
     };
     const showLogo = () => {
       image.hidden = false;
-      if (fallback) fallback.hidden = true;
+      if (brand) brand.hidden = false;
     };
 
     if (!url) {
-      image.removeAttribute("src");
-      showFallback();
+      hideLogo();
       return;
     }
 
     image.onload = showLogo;
-    image.onerror = showFallback;
+    image.onerror = hideLogo;
     image.hidden = true;
-    if (fallback) fallback.hidden = false;
+    if (brand) brand.hidden = true;
     image.src = url;
 
     if (image.complete && image.naturalWidth > 0) {
@@ -272,7 +271,6 @@ async function loadStorefront() {
         ...DEFAULT_SETTINGS,
         ...(settingsPayload.settings || {})
       };
-      localStorage.setItem("sks_loading_enabled", String(siteSettings.loadingAnimationEnabled !== false));
     }
   } catch (error) {
     console.error(error);
@@ -291,11 +289,6 @@ async function loadStorefront() {
   applySiteSettings();
   renderProducts();
   focusLinkedProduct();
-  const preloader = document.querySelector("#preloader");
-  if (preloader) {
-    preloader.classList.add("is-hidden");
-    window.setTimeout(() => { preloader.hidden = true; }, 360);
-  }
 }
 
 function focusLinkedProduct() {
@@ -336,9 +329,5 @@ filterButtons.forEach((button) => {
     renderProducts();
   });
 });
-
-if (localStorage.getItem("sks_loading_enabled") === "true") {
-  document.querySelector("#preloader")?.removeAttribute("hidden");
-}
 
 loadStorefront();
