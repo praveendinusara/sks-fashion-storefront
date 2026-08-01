@@ -10,7 +10,7 @@ export default async function handler(request, response) {
     const state = await getStoreState();
     response.setHeader("Cache-Control", "s-maxage=30, stale-while-revalidate=120");
     return response.status(200).json({
-      products: state.products,
+      products: state.products.filter((product) => product.status === "published"),
       updatedAt: state.updatedAt
     });
   } catch (error) {

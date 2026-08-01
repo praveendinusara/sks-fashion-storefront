@@ -40,7 +40,7 @@ export default async function handler(request, response) {
     const productUrl = `${origin}/?product=${encodeURIComponent(product.id)}`;
     const imageUrl = new URL(product.image, origin).toString();
     const title = `${product.name} | SKS`;
-    const description = `${formatLkr(product.priceLkr)} | Sizes ${product.sizes.join(", ")} | Cash on delivery and islandwide delivery available.`;
+    const description = `${formatLkr(product.priceLkr)} | Sizes ${product.sizes.map((size) => typeof size === "string" ? size : size.label).join(", ")} | Cash on delivery and islandwide delivery available.`;
 
     response.setHeader("Content-Type", "text/html; charset=utf-8");
     response.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=3600");
