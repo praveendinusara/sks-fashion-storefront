@@ -10,7 +10,9 @@ export default async function handler(request, response) {
   if (!session) return;
   return response.status(200).json({
     authenticated: true,
-    username: session.username
+    username: session.username,
+    role: session.role,
+    csrfToken: session.csrfToken,
+    expiresAt: session.expiresAt
   });
 }
-

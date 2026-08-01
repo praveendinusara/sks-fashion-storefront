@@ -1,7 +1,7 @@
 import {
   authenticateCredentials,
   clearLoginFailures,
-  createSessionCookie,
+  createSession,
   getClientAddress,
   loginIsRateLimited,
   recordLoginFailure,
@@ -43,7 +43,12 @@ export default async function handler(request, response) {
   }
 
   clearLoginFailures(address);
-  response.setHeader("Set-Cookie", createSessionCookie(username));
-  return response.status(200).json({ authenticated: true, username });
+  const created = createSession(username);
+  response.setHeader("Set-Cookie", created.cookie);
+  return response.status(200).json({
+    authenticated: true,
+    username,
+    role: created.session.role,
+    csrfToken: created.session.csrfToken
+  });
 }
-
