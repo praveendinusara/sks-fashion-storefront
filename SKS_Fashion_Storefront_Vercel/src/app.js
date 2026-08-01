@@ -14,6 +14,10 @@ const DEFAULT_SETTINGS = {
   instagram: "",
   tiktok: "",
   youtube: ""
+  ,loadingAnimationEnabled: true
+  ,logoWidth: 180
+  ,logoAlignment: "left"
+  ,theme: {}
 };
 const selectedSizes = new Map();
 let allProducts = [];
@@ -36,28 +40,37 @@ function escapeHtml(value) {
   })[character]);
 }
 
-function productCard(product) {
+function productCard(product, index) {
   const chosenSize = selectedSizes.get(product.id);
-  const sizes = product.sizes.map((size) => `
+  const normalizedSizes = (product.sizes || []).map((size, index) => typeof size === "string"
+    ? { id: `${product.id}-${index}`, label: size, available: true, order: index }
+    : size
+  ).sort((left, right) => Number(left.order || 0) - Number(right.order || 0));
+  const sizes = normalizedSizes.map((size) => `
     <button
-      class="size-option${chosenSize === size ? " is-selected" : ""}"
+      class="size-option${chosenSize === size.label ? " is-selected" : ""}"
       type="button"
-      data-size="${escapeHtml(size)}"
+      data-size="${escapeHtml(size.label)}"
       data-product-id="${escapeHtml(product.id)}"
-      aria-pressed="${chosenSize === size ? "true" : "false"}"
-    >${escapeHtml(size)}</button>
+      aria-pressed="${chosenSize === size.label ? "true" : "false"}"
+      ${size.available === false ? "disabled aria-disabled=\"true\"" : ""}
+    >${escapeHtml(size.label)}</button>
   `).join("");
+  const media = product.media || {};
+  const aspectRatio = ({ "1:1": "1 / 1", "4:5": "4 / 5", "3:4": "3 / 4" })[media.aspectRatio] || "4 / 5";
+  const imageTransform = `translate(${Number(media.offsetX || 0)}%, ${Number(media.offsetY || 0)}%) scale(${Number(media.zoom || 1)}) rotate(${Number(media.rotation || 0)}deg)`;
 
   return `
     <article class="product-card" id="product-${escapeHtml(product.id)}" data-product-id="${escapeHtml(product.id)}">
-      <div class="product-media">
+      <div class="product-media" style="aspect-ratio:${aspectRatio}">
         <img
           src="${escapeHtml(product.image)}"
           alt="${escapeHtml(product.name)}"
-          style="object-position:${escapeHtml(product.imagePosition)}"
-          loading="lazy"
-          width="1773"
-          height="887"
+          style="object-position:${Number(media.focalX ?? 50)}% ${Number(media.focalY ?? 50)}%;object-fit:${media.fit === "contain" ? "contain" : "cover"};transform:${imageTransform}"
+          loading="${index === 0 ? "eager" : "lazy"}"
+          ${index === 0 ? "fetchpriority=\"high\"" : ""}
+          width="1200"
+          height="1500"
         >
         <span class="stock-badge ${product.inStock ? "in-stock" : "sold-out"}">
           ${product.inStock ? "In stock" : "Sold out"}
@@ -73,7 +86,7 @@ function productCard(product) {
         </div>
         <p class="product-description">${escapeHtml(product.description)}</p>
         <p class="product-material"><span>Material</span>${escapeHtml(product.material)}</p>
-        <fieldset class="size-picker" ${product.inStock ? "" : "disabled"}>
+        <fieldset class="size-picker" tabindex="-1" ${product.inStock ? "" : "disabled"} ${normalizedSizes.length ? "" : "hidden"}>
           <legend>Select your size</legend>
           <div class="size-options">${sizes}</div>
         </fieldset>
@@ -133,21 +146,31 @@ function orderProduct(productId) {
   if (!product) return;
 
   const size = selectedSizes.get(product.id);
-  if (!size) {
+  const requiresSize = (product.sizes || []).some((item) => typeof item === "string" ? Boolean(item) : item.available !== false);
+  if (requiresSize && !size) {
     showToast("Please select a size before continuing.");
-    document.querySelector(`#product-${CSS.escape(product.id)} .size-picker`)?.focus();
+    const picker = document.querySelector(`#product-${CSS.escape(product.id)} .size-picker`);
+    picker?.classList.add("needs-attention");
+    picker?.focus();
+    window.setTimeout(() => picker?.classList.remove("needs-attention"), 1400);
     return;
   }
 
   const message = buildOrderMessage({
     product,
-    size
+    size: size || "Not required"
   });
   const whatsappUrl = buildWhatsAppUrl({
     phoneNumber: siteSettings.whatsappNumber,
     message
   });
 
+  fetch("/api/click", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ productId: product.id }),
+    keepalive: true
+  }).catch(() => {});
   window.location.href = whatsappUrl;
 }
 
@@ -189,6 +212,16 @@ function applyBrandLogo(url) {
 function applySiteSettings() {
   const whatsappUrl = `https://wa.me/${siteSettings.whatsappNumber}`;
   applyBrandLogo(siteSettings.logoImage);
+  document.documentElement.style.setProperty("--brand-logo-width", `${Number(siteSettings.logoWidth || 180)}px`);
+  document.documentElement.dataset.logoAlignment = siteSettings.logoAlignment || "left";
+  const themeMap = {
+    primary: "--ink", secondary: "--paper", accent: "--red", button: "--button",
+    buttonText: "--button-text", background: "--paper", header: "--header",
+    footer: "--footer", text: "--text", link: "--link"
+  };
+  Object.entries(siteSettings.theme || {}).forEach(([key, value]) => {
+    if (/^#[0-9a-f]{6}$/i.test(value) && themeMap[key]) document.documentElement.style.setProperty(themeMap[key], value);
+  });
 
   document.querySelectorAll("[data-whatsapp-link]").forEach((link) => {
     link.href = whatsappUrl;
@@ -239,6 +272,7 @@ async function loadStorefront() {
         ...DEFAULT_SETTINGS,
         ...(settingsPayload.settings || {})
       };
+      localStorage.setItem("sks_loading_enabled", String(siteSettings.loadingAnimationEnabled !== false));
     }
   } catch (error) {
     console.error(error);
@@ -257,6 +291,11 @@ async function loadStorefront() {
   applySiteSettings();
   renderProducts();
   focusLinkedProduct();
+  const preloader = document.querySelector("#preloader");
+  if (preloader) {
+    preloader.classList.add("is-hidden");
+    window.setTimeout(() => { preloader.hidden = true; }, 360);
+  }
 }
 
 function focusLinkedProduct() {
@@ -298,10 +337,8 @@ filterButtons.forEach((button) => {
   });
 });
 
-window.addEventListener("load", () => {
-  window.setTimeout(() => {
-    document.querySelector("#preloader")?.classList.add("is-hidden");
-  }, 450);
-});
+if (localStorage.getItem("sks_loading_enabled") === "true") {
+  document.querySelector("#preloader")?.removeAttribute("hidden");
+}
 
 loadStorefront();
