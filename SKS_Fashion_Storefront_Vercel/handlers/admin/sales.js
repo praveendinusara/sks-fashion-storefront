@@ -50,7 +50,7 @@ export default async function handler(request, response) {
     }
     const query = request.query || {};
     const term = String(query.search || "").toLowerCase();
-    const filteredLog = state.salesLog.filter((entry) => (!query.from || entry.saleDate >= query.from) && (!query.to || entry.saleDate <= query.to) && (!term || `${entry.productCode} ${entry.productName} ${entry.enteredBy}`.toLowerCase().includes(term));
+    const filteredLog = state.salesLog.filter((entry) => (!query.from || entry.saleDate >= query.from) && (!query.to || entry.saleDate <= query.to) && (!term || `${entry.productCode} ${entry.productName} ${entry.enteredBy}`.toLowerCase().includes(term)));
     return response.status(200).json({
       summary: buildSalesSummary(state),
       metrics: salesMetrics(filteredLog),
