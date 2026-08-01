@@ -3,6 +3,8 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { findProduct, listProducts } from "../lib/database.js";
+import { migrateState } from "../lib/catalog.js";
+import { buildSalesSummary } from "../lib/sales.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const port = Number(process.env.PORT || 4173);
@@ -42,8 +44,31 @@ const server = createServer(async (request, response) => {
 
   try {
     if (url.pathname === "/api/products") {
-      const products = await listProducts();
+      const products = migrateState({ products: await listProducts() }).products;
       return send(response, 200, mimeTypes[".json"], JSON.stringify({ products }));
+    }
+
+    if (url.pathname === "/api/site-settings") {
+      return send(response, 200, mimeTypes[".json"], JSON.stringify({ settings: migrateState({}).settings }));
+    }
+
+    if (process.env.PREVIEW_ADMIN === "1" && url.pathname === "/api/admin/session") {
+      return send(response, 200, mimeTypes[".json"], JSON.stringify({ authenticated: true, username: "preview", role: "owner", csrfToken: "preview-token" }));
+    }
+
+    if (process.env.PREVIEW_ADMIN === "1" && url.pathname === "/api/admin/products") {
+      const state = migrateState({ products: await listProducts() });
+      return send(response, 200, mimeTypes[".json"], JSON.stringify({ products: state.products, updatedAt: state.updatedAt }));
+    }
+
+    if (process.env.PREVIEW_ADMIN === "1" && url.pathname === "/api/admin/settings") {
+      const state = migrateState({});
+      return send(response, 200, mimeTypes[".json"], JSON.stringify({ settings: state.settings, updatedAt: state.updatedAt }));
+    }
+
+    if (process.env.PREVIEW_ADMIN === "1" && url.pathname === "/api/admin/sales") {
+      const state = migrateState({ products: await listProducts() });
+      return send(response, 200, mimeTypes[".json"], JSON.stringify({ summary: buildSalesSummary(state), salesLog: [], sync: {}, sheetsConfigured: false }));
     }
 
     if (url.pathname === "/api/product-share") {
@@ -64,7 +89,7 @@ const server = createServer(async (request, response) => {
 </head><body><a href="${escapeHtml(productUrl)}">Open product</a></body></html>`);
     }
 
-    const requestPath = url.pathname === "/" ? "/index.html" : url.pathname;
+    const requestPath = url.pathname === "/" ? "/index.html" : url.pathname === "/admin" ? "/admin/index.html" : url.pathname;
     const safePath = path.normalize(requestPath).replace(/^(\.\.[/\\])+/, "");
     const absolutePath = path.join(root, safePath);
 

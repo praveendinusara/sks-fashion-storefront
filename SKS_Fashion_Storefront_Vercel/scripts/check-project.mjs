@@ -9,6 +9,11 @@ const requiredFiles = [
   "src/styles.css",
   "api/products.js",
   "api/product-share.js",
+  "api/click.js",
+  "api/admin/sales.js",
+  "admin/index.html",
+  "admin/app.js",
+  "google-sheets/Code.gs",
   "data/store.db",
   "vercel.json"
 ];
