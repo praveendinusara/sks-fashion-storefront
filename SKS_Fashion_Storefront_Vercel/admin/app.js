@@ -151,19 +151,10 @@ function openProductEditor(product = null) {
   productDialog.showModal();
 }
 
-function setLogoPreview(url) {
-  const image = $("#logoPreview");
-  image.hidden = !url;
-  if (url) image.src = url; else image.removeAttribute("src");
-  image.closest(".logo-preview-surface").classList.toggle("is-empty", !url);
-}
-
 function populateSettings() {
   const simple = ["whatsappNumber", "whatsappDisplay", "deliveryDetails", "facebook", "instagram", "tiktok", "youtube", "productCodePrefix", "logoWidth", "logoAlignment", "googleSheetUrl"];
   simple.forEach((name) => { const input = settingsForm.elements.namedItem(name); if (input) input.value = state.settings[name] ?? ""; });
-  settingsForm.elements.loadingAnimationEnabled.checked = state.settings.loadingAnimationEnabled !== false;
   Object.entries({ ...DEFAULT_THEME, ...(state.settings.theme || {}) }).forEach(([key, value]) => { const input = settingsForm.elements.namedItem(`theme.${key}`); if (input) input.value = value; });
-  setLogoPreview(state.settings.logoImage || "");
   $("#heroPreview").src = state.settings.heroImage || "/assets/hero.png";
   previewTheme();
 }
@@ -226,7 +217,7 @@ async function saveSettings(event) {
     let heroImage = state.settings.heroImage || "/assets/hero.png";
     if ($("#heroFile").files[0]) heroImage = await uploadImage($("#heroFile").files[0]);
     const data = new FormData(settingsForm);
-    const settings = { whatsappNumber: String(data.get("whatsappNumber") || "").replace(/\D/g, ""), whatsappDisplay: data.get("whatsappDisplay"), deliveryDetails: data.get("deliveryDetails"), facebook: data.get("facebook"), instagram: data.get("instagram"), tiktok: data.get("tiktok"), youtube: data.get("youtube"), productCodePrefix: data.get("productCodePrefix"), loadingAnimationEnabled: settingsForm.elements.loadingAnimationEnabled.checked, logoImage, logoWidth: Number(data.get("logoWidth")), logoAlignment: data.get("logoAlignment"), heroImage, googleSheetUrl: data.get("googleSheetUrl"), theme: currentTheme() };
+    const settings = { whatsappNumber: String(data.get("whatsappNumber") || "").replace(/\D/g, ""), whatsappDisplay: data.get("whatsappDisplay"), deliveryDetails: data.get("deliveryDetails"), facebook: data.get("facebook"), instagram: data.get("instagram"), tiktok: data.get("tiktok"), youtube: data.get("youtube"), productCodePrefix: data.get("productCodePrefix"), logoImage, logoWidth: Number(data.get("logoWidth")), logoAlignment: data.get("logoAlignment"), heroImage, googleSheetUrl: data.get("googleSheetUrl"), theme: currentTheme() };
     const payload = await api("/api/admin/settings", { method: "PUT", body: JSON.stringify({ settings }) });
     state.settings = payload.settings; populateSettings(); setUpdatedAt(payload.updatedAt); toast("Site settings updated.");
   } catch (error) { $("#settingsError").textContent = error.message; } finally { setBusy(settingsForm, false); }
@@ -277,9 +268,8 @@ $("#adminSizeList").addEventListener("click", (event) => { const row = event.tar
 document.querySelectorAll(".media-controls input,.media-controls select").forEach((input) => input.addEventListener("input", updateMediaPreview));
 $("#resetImageButton").addEventListener("click", () => { Object.entries({ aspectRatio: "4:5", imageFit: "cover", zoom: 1, offsetX: 0, offsetY: 0, rotation: 0 }).forEach(([key, value]) => { productForm.elements[key].value = value; }); updateMediaPreview(); });
 $("#productImageFile").addEventListener("change", () => { const file = $("#productImageFile").files[0]; if (file) { productImagePreview.src = URL.createObjectURL(file); productImagePreview.dataset.url = productImagePreview.src; } });
-$("#logoFile").addEventListener("change", () => { const file = $("#logoFile").files[0]; if (file) setLogoPreview(URL.createObjectURL(file)); });
 $("#heroFile").addEventListener("change", () => { const file = $("#heroFile").files[0]; if (file) $("#heroPreview").src = URL.createObjectURL(file); });
-$("#removeLogoButton").addEventListener("click", () => { if (confirm("Remove the logo from the website?")) { state.settings.logoImage = ""; $("#logoFile").value = ""; setLogoPreview(""); toast("Logo will be removed when settings are saved."); } });
+$("#removeLogoButton").addEventListener("click", () => { if (confirm("Remove the logo from the website?")) { state.settings.logoImage = ""; $("#logoFile").value = ""; toast("Logo will be removed when settings are saved."); } });
 $("#resetThemeButton").addEventListener("click", () => { Object.entries(DEFAULT_THEME).forEach(([key, value]) => settingsForm.elements.namedItem(`theme.${key}`).value = value); previewTheme(); });
 $("#themeControls").addEventListener("input", previewTheme);
 $("#previewProductButton").addEventListener("click", () => previewProduct(productFromFormForPreview()));
