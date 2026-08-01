@@ -583,43 +583,6 @@ label small {
   background: #ece9e2;
 }
 
-.logo-preview-surface {
-  position: relative;
-  display: grid;
-  width: 220px;
-  min-height: 104px;
-  place-items: center;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background-color: #f8f8f8;
-  background-image:
-    linear-gradient(45deg, #ededed 25%, transparent 25%),
-    linear-gradient(-45deg, #ededed 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #ededed 75%),
-    linear-gradient(-45deg, transparent 75%, #ededed 75%);
-  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
-  background-size: 16px 16px;
-}
-
-.logo-preview-surface.is-empty::before {
-  content: "No logo published yet";
-  padding: 18px;
-  color: var(--muted);
-  font-size: 11px;
-  text-align: center;
-}
-
-.image-setting.logo-setting img {
-  width: 100%;
-  height: 104px;
-  padding: 12px;
-  aspect-ratio: auto;
-  border-radius: 0;
-  object-fit: contain;
-  background: rgba(255, 255, 255, 0.9);
-}
-
 .settings-actions {
   display: flex;
   align-items: center;
@@ -851,8 +814,7 @@ label small {
   }
 
   .image-setting img,
-  .product-image-editor img,
-  .logo-preview-surface {
+  .product-image-editor img {
     width: 100%;
   }
 

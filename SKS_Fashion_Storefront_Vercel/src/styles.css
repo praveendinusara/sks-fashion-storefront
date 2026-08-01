@@ -73,63 +73,6 @@ img {
   padding-inline: clamp(18px, 4vw, 48px);
 }
 
-.preloader {
-  align-items: center;
-  background: var(--ink);
-  display: flex;
-  inset: 0;
-  justify-content: center;
-  position: fixed;
-  transition: opacity 0.35s ease, visibility 0.35s ease;
-  z-index: 1000;
-}
-
-.preloader.is-hidden {
-  opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
-}
-
-.preloader-mark {
-  color: white;
-  font-size: 32px;
-  font-weight: 950;
-  letter-spacing: -0.08em;
-  position: relative;
-}
-
-.preloader-mark::after {
-  background: var(--red);
-  bottom: -10px;
-  content: "";
-  height: 3px;
-  left: 0;
-  position: absolute;
-  transform-origin: left;
-  animation: loading 0.9s ease-in-out infinite alternate;
-  width: 100%;
-}
-
-@keyframes loading {
-  from { transform: scaleX(0.25); }
-  to { transform: scaleX(1); }
-}
-
-.preloader-brand {
-  display: grid;
-  place-items: center;
-}
-
-.preloader-logo {
-  width: min(290px, 74vw);
-  max-height: 118px;
-  padding: 8px;
-  border-radius: 12px;
-  object-fit: contain;
-  background: white;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
-}
-
 .site-header {
   left: 0;
   padding: 18px 0;
@@ -150,16 +93,6 @@ img {
   align-items: center;
   display: inline-flex;
   min-height: 44px;
-}
-
-.brand-fallback {
-  align-items: center;
-  display: inline-flex;
-  font-size: 15px;
-  font-weight: 900;
-  gap: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .brand-logo {
@@ -183,19 +116,6 @@ html[data-logo-alignment="right"] .header-inner { flex-direction: row-reverse; }
   padding: 4px;
   border-radius: 7px;
   background: white;
-}
-
-.brand-symbol {
-  align-items: center;
-  background: var(--red);
-  clip-path: polygon(13% 0, 100% 0, 87% 100%, 0 100%);
-  color: white;
-  display: inline-flex;
-  font-size: 13px;
-  height: 34px;
-  justify-content: center;
-  letter-spacing: -0.04em;
-  width: 39px;
 }
 
 .site-nav {
@@ -783,19 +703,9 @@ html[data-logo-alignment="right"] .header-inner { flex-direction: row-reverse; }
     padding: 12px 0;
   }
 
-  .brand-fallback {
-    font-size: 11px;
-    gap: 8px;
-  }
-
   .brand-logo {
     height: 38px;
     max-width: 150px;
-  }
-
-  .brand-symbol {
-    height: 30px;
-    width: 34px;
   }
 
   .nav-whatsapp {

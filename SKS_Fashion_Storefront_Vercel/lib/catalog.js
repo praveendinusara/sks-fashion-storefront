@@ -27,7 +27,6 @@ const DEFAULT_SETTINGS = {
   logoImage: "",
   logoWidth: 180,
   logoAlignment: "left",
-  loadingAnimationEnabled: true,
   productCodePrefix: "SKS",
   heroImage: "/assets/hero.png",
   theme: DEFAULT_THEME,
@@ -75,7 +74,6 @@ function normalizedSettings(settings = {}) {
         .map(([key, value]) => [key, typeof value === "boolean" ? value : String(value ?? "").trim()])
     ),
     whatsappNumber: rawWhatsApp || DEFAULT_SETTINGS.whatsappNumber,
-    loadingAnimationEnabled: settings.loadingAnimationEnabled !== false,
     logoWidth: Math.min(320, Math.max(60, Math.round(Number(settings.logoWidth) || 180))),
     logoAlignment: ["left", "center", "right"].includes(settings.logoAlignment)
       ? settings.logoAlignment

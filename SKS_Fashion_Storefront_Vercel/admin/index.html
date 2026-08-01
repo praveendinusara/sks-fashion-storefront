@@ -141,12 +141,8 @@
           </section>
 
           <section class="panel-card settings-section">
-            <div class="panel-card-header"><div><h2>Loading animation and product codes</h2><p>Control the SKS loader and automatic product-code prefix.</p></div></div>
+            <div class="panel-card-header"><div><h2>Product codes</h2><p>Set the automatic product-code prefix.</p></div></div>
             <div class="form-grid">
-              <label class="stock-switch">
-                <input name="loadingAnimationEnabled" type="checkbox">
-                <span>Enable SKS loading animation</span>
-              </label>
               <label>Product-code prefix
                 <input name="productCodePrefix" maxlength="8" placeholder="SKS">
                 <small>New products will use this prefix. Existing codes never change.</small>
@@ -162,9 +158,6 @@
               </div>
             </div>
             <div class="image-setting logo-setting">
-              <div class="logo-preview-surface is-empty">
-                <img id="logoPreview" alt="Current shop logo preview" hidden>
-              </div>
               <label>
                 Replace shop logo
                 <input id="logoFile" type="file" accept="image/jpeg,image/png,image/webp,image/avif">
