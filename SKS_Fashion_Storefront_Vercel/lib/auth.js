@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 
 const COOKIE_NAME = "sks_admin_session";
+const CLIENT_COOKIE_NAME = "sks_sales_client_session";
 const SESSION_LIFETIME_SECONDS = 60 * 60 * 8;
 const loginAttempts = new Map();
 
@@ -39,8 +40,8 @@ function parseCookies(request) {
   }, {});
 }
 
-function sessionFromRequest(request) {
-  const token = parseCookies(request)[COOKIE_NAME];
+function sessionFromRequest(request, cookieName = COOKIE_NAME) {
+  const token = parseCookies(request)[cookieName];
   if (!token || !getSecret()) return null;
 
   const [payload, suppliedSignature] = token.split(".");
@@ -58,9 +59,13 @@ function sessionFromRequest(request) {
 }
 
 export function createSession(username) {
+  return createRoleSession(username, process.env.ADMIN_ROLE?.trim() || "owner", COOKIE_NAME);
+}
+
+function createRoleSession(username, role, cookieName) {
   const session = {
     username,
-    role: process.env.ADMIN_ROLE?.trim() || "owner",
+    role,
     csrfToken: crypto.randomBytes(24).toString("base64url"),
     version: process.env.ADMIN_SESSION_VERSION || "2",
     expiresAt: Date.now() + SESSION_LIFETIME_SECONDS * 1000
@@ -69,7 +74,7 @@ export function createSession(username) {
   const token = `${payload}.${signature(payload)}`;
 
   const cookie = [
-    `${COOKIE_NAME}=${token}`,
+    `${cookieName}=${token}`,
     "Path=/",
     "HttpOnly",
     "Secure",
@@ -77,6 +82,10 @@ export function createSession(username) {
     `Max-Age=${SESSION_LIFETIME_SECONDS}`
   ].join("; ");
   return { session, cookie };
+}
+
+export function createClientSession(username) {
+  return createRoleSession(username, "sales_client", CLIENT_COOKIE_NAME);
 }
 
 export function clearSessionCookie() {
@@ -90,11 +99,23 @@ export function clearSessionCookie() {
   ].join("; ");
 }
 
+export function clearClientSessionCookie() {
+  return clearCookie(CLIENT_COOKIE_NAME);
+}
+
+function clearCookie(cookieName) {
+  return [`${cookieName}=`, "Path=/", "HttpOnly", "Secure", "SameSite=Strict", "Max-Age=0"].join("; ");
+}
+
 export function authenticateCredentials(username, password) {
   const expectedUsername = process.env.ADMIN_USERNAME?.trim() || "";
   const expectedPassword = process.env.ADMIN_PASSWORD || "";
   const expectedHash = process.env.ADMIN_PASSWORD_HASH || "";
 
+  return authenticateAgainst(username, password, expectedUsername, expectedPassword, expectedHash);
+}
+
+function authenticateAgainst(username, password, expectedUsername, expectedPassword, expectedHash) {
   if (!expectedUsername || (!expectedPassword && !expectedHash) || !getSecret()) return false;
   if (!safeEqual(username, expectedUsername)) return false;
   if (!expectedHash) return safeEqual(password, expectedPassword);
@@ -114,6 +135,13 @@ export function authenticateCredentials(username, password) {
   }
 }
 
+export function authenticateClientCredentials(username, password) {
+  const expectedUsername = process.env.SALES_CLIENT_USERNAME?.trim() || "";
+  const expectedPassword = process.env.SALES_CLIENT_PASSWORD || "";
+  const expectedHash = process.env.SALES_CLIENT_PASSWORD_HASH || "";
+  return authenticateAgainst(username, password, expectedUsername, expectedPassword, expectedHash);
+}
+
 export function requireAdmin(request, response) {
   const session = sessionFromRequest(request);
 
@@ -125,6 +153,16 @@ export function requireAdmin(request, response) {
     return null;
   }
 
+  return session;
+}
+
+export function requireSalesClient(request, response) {
+  const session = sessionFromRequest(request, CLIENT_COOKIE_NAME);
+  response.setHeader("Cache-Control", "private, no-store, max-age=0");
+  if (!session || session.role !== "sales_client") {
+    response.status(401).json({ error: "Sales-record sign-in required" });
+    return null;
+  }
   return session;
 }
 
